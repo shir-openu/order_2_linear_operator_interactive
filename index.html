@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>אופרטור דיפרנציאלי לינארי מסדר שני</title>
+  <style>
+    :root{
+      --bg:#0f172a;
+      --card:#111827;
+      --muted:#334155;
+      --text:#e5e7eb;
+      --accent:#1e40af;
+      --accent2:#b91c1c;
+      --accent3:#15803d;
+      --grid:#475569;
+      --axis:#94a3b8;
+      --btn:#0ea5e9;
+      --orange:#f97316;
+    }
+    html,body{height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    *{box-sizing:border-box}
+    .container{max-width:1100px;margin:0 auto;padding:16px}
+    h1{font-size:1.6rem;margin:0 0 8px 0}
+    h2{font-size:1.1rem;margin:18px 0 8px 0}
+    .card{background:var(--card);border-radius:16px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .row.op{flex-direction:row-reverse}
+    .col{flex:1 1 320px;min-width:280px}
+    label{font-size:.9rem}
+    select,input[type="number"],input[type="range"],button{width:100%;margin-top:6px;margin-bottom:10px;background:#0b1220;color:var(--text);border:1px solid #1f2937;border-radius:10px;padding:8px}
+    input[type="range"]{height:34px}
+    button{cursor:pointer;background:var(--btn);border:none;color:white;font-weight:600}
+    button:hover{filter:brightness(1.05)}
+    .tabs{display:flex;gap:6px;margin-bottom:10px}
+    .tab-btn{background:#1f2937;border:1px solid #263244;border-radius:9px;padding:8px 10px;font-weight:600}
+    .tab-btn.active{background:var(--accent);border-color:var(--accent)}
+    canvas{width:100%;height:420px;background:#0a0f1e;border-radius:16px;border:1px solid #1f2937;display:block}
+    .legend{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0}
+    .chip{display:flex;align-items:center;gap:6px;background:#0b1220;border:1px solid #263244;border-radius:999px;padding:4px 10px;font-size:.85rem;transition:opacity .2s ease}
+    .dot{width:12px;height:12px;border-radius:50%}
+    .muted{color:#cbd5e1}
+    .eq{font-family:inherit;background:#0b1220;border:1px solid #263244;border-radius:8px;padding:8px;white-space:pre-wrap;line-height:1.45}
+    .row.tight .col{min-width:220px}
+    .note{font-size:.9rem;color:#cbd5e1}
+    .eq-orange{color:var(--orange);border-color:var(--orange)}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>
+      <span class="muted">האופרטור הלינארי: </span>
+      <span class="muted">L[y] = y″ + a y′ + b y</span>
+    </h1>
+
+    <div class="tabs" role="tablist" aria-label="מצבים">
+      <button class="tab-btn active" data-tab="op">אופרטור ולינאריות</button>
+      <button class="tab-btn" data-tab="ivp">בעיית התחלה הומוגנית - מקדמים קבועים</button>
+    </div>
+
+    <!-- ===== OPERATOR / LINEARITY ===== -->
+    <section id="tab-op" class="card" aria-labelledby="אופרטור ולינאריות">
+      <div class="row op">
+        <!-- Right column -->
+        <div class="col">
+          <h2>בחירת y₁, y₂ (בתפקיד v₁, v₂)</h2>
+          <label>בחירת y₁(x)</label>
+          <select id="y1Type">
+            <option value="sin">sin(kx)</option>
+            <option value="cos">cos(kx)</option>
+            <option value="exp">e^{r x}</option>
+            <option value="x">x</option>
+            <option value="x2">x^2</option>
+            <option value="x3">x^3</option>
+          </select>
+          <label>בחירת הפרמטר k או r עבור y₁(x)</label>
+          <input id="p1" type="number" step="0.1" value="1" />
+
+          <label>בחירת y₂(x)</label>
+          <select id="y2Type">
+            <option value="cos">cos(kx)</option>
+            <option value="sin">sin(kx)</option>
+            <option value="exp">e^{r x}</option>
+            <option value="x">x</option>
+            <option value="x2">x^2</option>
+            <option value="x3">x^3</option>
+          </select>
+          <label>בחירת הפרמטר k או r עבור y₂(x)</label>
+          <input id="p2" type="number" step="0.1" value="1" />
+        </div>
+
+        <!-- Middle column -->
+        <div class="col">
+          <h2>הגדרת האופרטור כמד"ר לינארית הומוגנית מסדר 2 עם המקדמים a,b</h2>
+          <label>a</label>
+          <input id="a" type="number" step="0.1" value="0" />
+          <label>b</label>
+          <input id="b" type="number" step="0.1" value="1" />
+          <div class="eq">L[y](x) = y″(x) + a·y′(x) + b·y(x)</div>
+
+          <h2>תחום ותצוגה</h2>
+          <label>טווח x</label>
+          <div class="row tight">
+            <div class="col"><input id="xmin" type="number" step="0.5" value="-6" /></div>
+            <div class="col"><input id="xmax" type="number" step="0.5" value="6" /></div>
+          </div>
+          <label><input id="showDerivs" type="checkbox" checked /> הציגו גם y′ ו-y″</label>
+          <label><input id="splitCheck" type="checkbox" checked /> הציגו השוואה: L[αy₁+βy₂] מול αL[y₁]+βL[y₂]</label>
+          <button id="resetOp">איפוס</button>
+        </div>
+
+        <!-- Left column -->
+        <div class="col">
+          <h2>צירוף לינארי של v₁,v₂</h2>
+          <label>α</label>
+          <input id="alpha" type="range" min="-3" max="3" value="1" step="0.1" />
+          <label>β</label>
+          <input id="beta" type="range" min="-3" max="3" value="1" step="0.1" />
+        </div>
+      </div>
+
+      <div class="legend">
+        <span class="chip"><span class="dot" style="background:var(--accent)"></span> y(x)</span>
+        <span class="chip"><span class="dot" style="background:var(--accent2)"></span> L[y](x)</span>
+        <span id="chipSplit" class="chip"><span class="dot" style="background:var(--accent3)"></span> αL[y₁]+βL[y₂] (השוואה)</span>
+        <span class="chip"><span class="dot" style="background:#9ca3af"></span> y′, y″ (אפור)</span>
+      </div>
+      <canvas id="canvasOp" width="1080" height="460" aria-label="גרף אופרטור"></canvas>
+
+      <div class="row" style="margin-top:8px; align-items:flex-start; gap:12px;">
+        <div class="col" style="min-width:320px; max-width:520px;">
+          <div class="eq eq-orange" id="opSummaryTitle">האופרטור הלינארי שבחרתם הוא:</div>
+          <div class="eq eq-orange" id="opSummaryA" style="margin-top:6px;"></div>
+          <div class="eq eq-orange" id="opSummaryB" style="margin-top:6px;"></div>
+        </div>
+        <div class="col" style="min-width:320px; max-width:520px;">
+          <div class="eq" id="linSummaryTitle">לינאריות מפורשת עבור בחירותיכם</div>
+          <div class="eq" id="linY1" style="margin-top:6px;"></div>
+          <div class="eq" id="linY2" style="margin-top:6px;"></div>
+          <div class="eq" id="linAlphaBeta" style="margin-top:6px;"></div>
+          <div class="eq" id="linEquality" style="margin-top:6px;"></div>
+        </div>
+      </div>
+
+      <div class="note" id="readout">רחפו עם העכבר על הגרף לקריאת ערכים.</div>
+    </section>
+
+    <!-- ===== HOMOGENEOUS IVP (CONSTANT COEFFS) ===== -->
+    <section id="tab-ivp" class="card" hidden aria-labelledby="בעיית התחלה הומוגנית - מקדמים קבועים">
+      <div class="row">
+        <div class="col">
+          <h2>בחירת המקדם C1 בהצגת הפתרון הכללי</h2>
+          <input id="c1" type="range" min="-3" max="3" step="0.1" value="1" />
+          <h2>בחירת המקדם C2 בהצגת הפתרון הכללי</h2>
+          <input id="c2" type="range" min="-3" max="3" step="0.1" value="0.5" />
+        </div>
+
+        <div class="col">
+          <h2>בחירת תנאי ההתחלה</h2>
+          <label>x₀</label><input id="ivp_x0" type="number" step="0.1" value="0" />
+          <label>y(x₀) =</label><input id="ivp_y0" type="number" step="0.1" value="1" />
+          <label>y′(x₀) =</label><input id="ivp_v0" type="number" step="0.1" value="0" />
+
+          <h2>טווח וצעדים</h2>
+          <label>טווח x</label>
+          <div class="row tight">
+            <div class="col"><input id="ivp_xmin" type="number" step="0.5" value="-6" /></div>
+            <div class="col"><input id="ivp_xmax" type="number" step="0.5" value="6" /></div>
+          </div>
+          <label>Δx (קטן = מדויק יותר)</label>
+          <input id="ivp_h" type="number" step="0.01" value="0.02" />
+          <button id="resetIvp">איפוס</button>
+        </div>
+
+        <div class="col">
+          <h2>בחירת מקדמי המשוואה הקבועים</h2>
+          <label>a</label><input id="ivp_a" type="number" step="0.1" value="0.4" />
+          <label>b</label><input id="ivp_b" type="number" step="0.1" value="1" />
+          <div class="eq">y″ + a·y′ + b·y = 0</div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <span class="chip"><span class="dot" style="background:var(--accent)"></span> הפתרון הכללי: y(x)=c₁·y₁(x)+c₂·y₂(x)</span>
+        <span class="chip"><span class="dot" style="background:#22c55e"></span> y₁: תנאי התחלה</span>
+        <span class="chip"><span class="dot" style="background:#eab308"></span> y₂: תנאי התחלה</span>
+        <span class="chip"><span class="dot" style="background:#f472b6"></span> פתרון ל-IC שנבחרו: y(x₀)=y₀, y′(x₀)=v₀ (מקווקו)</span>
+      </div>
+
+      <canvas id="canvasIvp" width="1080" height="460" aria-label="גרף פתרון בעיית התחלה הומוגנית"></canvas>
+
+      <!-- טקסטים דינמיים + קריאת ערכים עם העכבר -->
+      <div class="row" style="margin-top:8px; align-items:flex-start; gap:12px;">
+        <div class="col" style="min-width:320px; max-width:520px;">
+          <div class="eq eq-orange" id="ivpOp">L[y] = y″ + a·y′ + b·y</div>
+          <div class="eq" id="ivpBasis" style="margin-top:6px;"></div>
+        </div>
+        <div class="col" style="min-width:320px; max-width:520px;">
+          <div class="eq" id="ivpGeneral"></div>
+          <div class="eq" id="ivpIC" style="margin-top:6px;"></div>
+          <div class="eq" id="ivpCompare" style="margin-top:6px;"></div>
+        </div>
+      </div>
+
+      <div class="note" id="ivpReadout">רחפו עם העכבר על הגרף לקריאת ערכים.</div>
+    </section>
+  </div>
+
+  <script>
+    // ---------- Utilities ----------
+    const lerp=(a,b,t)=>a+(b-a)*t;
+    const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+    function niceTicks(min,max,target=8){
+      const span=max-min; if(span<=0) return{step:1,start:min,ticks:[]};
+      const raw=span/target, mag=10**Math.floor(Math.log10(raw)), norm=raw/mag;
+      const nice= norm<1.5?1:norm<3?2:norm<7?5:10, step=nice*mag, start=Math.ceil(min/step)*step;
+      const ticks=[]; for(let v=start; v<=max+1e-9; v+=step) ticks.push(v); return{step,start,ticks};
+    }
+    function mapToCanvas(x,y,xmin,xmax,ymin,ymax,w,h,pad=40){
+      const X=pad+(x-xmin)/(xmax-xmin)*(w-2*pad);
+      const Y=h-pad-(y-ymin)/(ymax-ymin)*(h-2*pad);
+      return [X,Y];
+    }
+    function drawGrid(ctx,xmin,xmax,ymin,ymax,w,h){
+      const pad=40; ctx.clearRect(0,0,w,h); ctx.fillStyle='#0a0f1e'; ctx.fillRect(0,0,w,h);
+      ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--grid'); ctx.lineWidth=1; ctx.beginPath();
+      const xt=niceTicks(xmin,xmax).ticks, yt=niceTicks(ymin,ymax).ticks;
+      for(const xv of xt){ const [X]=mapToCanvas(xv,0,xmin,xmax,ymin,ymax,w,h,pad); ctx.moveTo(X,pad); ctx.lineTo(X,h-pad); }
+      for(const yv of yt){ const [,Y]=mapToCanvas(0,yv,xmin,xmax,ymin,ymax,w,h,pad); ctx.moveTo(pad,Y); ctx.lineTo(w-pad,Y); }
+      ctx.stroke();
+      ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--axis'); ctx.lineWidth=1.6; ctx.beginPath();
+      let [x1,y0]=mapToCanvas(xmin,0,xmin,xmax,ymin,ymax,w,h,pad); let [x2]=mapToCanvas(xmax,0,xmin,xmax,ymin,ymax,w,h,pad);
+      ctx.moveTo(x1,y0); ctx.lineTo(x2,y0);
+      let [x0,y1]=mapToCanvas(0,ymin,xmin,xmax,ymin,ymax,w,h,pad); let [,y2]=mapToCanvas(0,ymax,xmin,xmax,ymin,ymax,w,h,pad);
+      ctx.moveTo(x0,y1); ctx.lineTo(x0,y2); ctx.stroke();
+      ctx.fillStyle='#cbd5e1'; ctx.font='12px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif';
+      for(const xv of xt){ const [X]=mapToCanvas(xv,0,xmin,xmax,ymin,ymax,w,h,pad); ctx.fillText(String(xv.toFixed(2)).replace(/\.00$/,''), X-12, h-10); }
+      for(const yv of yt){ const [,Y]=mapToCanvas(0,yv,xmin,xmax,ymin,ymax,w,h,pad); ctx.fillText(String(yv.toFixed(2)).replace(/\.00$/,''), 6, Y-4); }
+    }
+
+    // ---------- Base functions ----------
+    function makeBase(type,param){
+      switch(type){
+        case 'sin':{const k=param; return{ name:'sin('+k+'x)', f:x=>Math.sin(k*x), f1:x=>k*Math.cos(k*x), f2:x=>-k*k*Math.sin(k*x)};}
+        case 'cos':{const k=param; return{ name:'cos('+k+'x)', f:x=>Math.cos(k*x), f1:x=>-k*Math.sin(k*x), f2:x=>-k*k*Math.cos(k*x)};}
+        case 'exp':{const r=param; return{ name:'e^{'+r+'x}', f:x=>Math.exp(r*x), f1:x=>r*Math.exp(r*x), f2:x=>r*r*Math.exp(r*x)};}
+        case 'x': return {name:'x', f:x=>x, f1:x=>1, f2:x=>0};
+        case 'x2': return {name:'x^2', f:x=>x*x, f1:x=>2*x, f2:x=>2};
+        case 'x3': return {name:'x^3', f:x=>x*x*x, f1:x=>3*x*x, f2:x=>6*x};
+        default: return {name:'0', f:x=>0, f1:x=>0, f2:x=>0};
+      }
+    }
+
+    const $=id=>document.getElementById(id);
+
+    // ===== Operator tab =====
+    const ctxOp=$('canvasOp').getContext('2d');
+
+    function computeOpData(){
+      const a=+($('a').value)||0, b=+($('b').value)||0;
+      const y1=makeBase($('y1Type').value, +($('p1').value)||0);
+      const y2=makeBase($('y2Type').value, +($('p2').value)||0);
+      const alpha=+($('alpha').value), beta=+($('beta').value);
+      const xmin=+($('xmin').value), xmax=+($('xmax').value);
+      const showDerivs=$('showDerivs').checked, split=$('splitCheck').checked;
+
+      const N=800, xs=new Array(N), y=new Array(N), yp=new Array(N), ypp=new Array(N), Ly=new Array(N), splitLy=new Array(N);
+      for(let i=0;i<N;i++){
+        const t=i/(N-1), x=xs[i]=lerp(xmin,xmax,t);
+        const f=alpha*y1.f(x)+beta*y2.f(x), f1=alpha*y1.f1(x)+beta*y2.f1(x), f2=alpha*y1.f2(x)+beta*y2.f2(x);
+        y[i]=f; yp[i]=f1; ypp[i]=f2; Ly[i]=f2+a*f1+b*f;
+        if(split){ const L1=y1.f2(x)+a*y1.f1(x)+b*y1.f(x); const L2=y2.f2(x)+a*y2.f1(x)+b*y2.f(x); splitLy[i]=alpha*L1+beta*L2; }
+      }
+      let ymin=Infinity,ymax=-Infinity; const expand=arr=>{for(const v of arr){ymin=Math.min(ymin,v); ymax=Math.max(ymax,v);}};
+      expand(y); expand(Ly); if(split) expand(splitLy); if(showDerivs){expand(yp); expand(ypp);}
+      if(!isFinite(ymin)||!isFinite(ymax)){ymin=-1;ymax=1;} if(ymax-ymin<1e-6){ymax=ymin+1;} const m=0.08*(ymax-ymin); ymin-=m; ymax+=m;
+      return {a,b,y1,y2,alpha,beta,xs,y,yp,ypp,Ly,splitLy,showDerivs,split,xmin,xmax,ymin,ymax};
+    }
+
+    function plotOp(){
+      const d=computeOpData(); const c=ctxOp.canvas, w=c.width, h=c.height; drawGrid(ctxOp,d.xmin,d.xmax,d.ymin,d.ymax,w,h); const pad=40;
+      const draw=(arr,color,width=2,dash=[])=>{ctxOp.lineWidth=width; ctxOp.setLineDash(dash); ctxOp.strokeStyle=color; ctxOp.beginPath();
+        for(let i=0;i<arr.length;i++){const [X,Y]=mapToCanvas(d.xs[i],arr[i],d.xmin,d.xmax,d.ymin,d.ymax,w,h,pad); if(i===0)ctxOp.moveTo(X,Y); else ctxOp.lineTo(X,Y);} ctxOp.stroke(); ctxOp.setLineDash([]);};
+      draw(d.y,getComputedStyle(document.documentElement).getPropertyValue('--accent'),2.4);
+      draw(d.Ly,getComputedStyle(document.documentElement).getPropertyValue('--accent2'),2.2);
+      if(d.split) draw(d.splitLy,getComputedStyle(document.documentElement).getPropertyValue('--accent3'),2.2,[6,6]);
+      if(d.showDerivs){draw(d.yp,'#9ca3af',1.4,[8,6]); draw(d.ypp,'#9ca3af',1.4,[2,6]);}
+      const chip=$('chipSplit'); if(chip) chip.style.opacity=d.split?'1':'.35';
+      const read=$('readout');
+      c.onmousemove=e=>{const r=c.getBoundingClientRect(), px=e.clientX-r.left, x=(px-pad)/(w-2*pad)*(d.xmax-d.xmin)+d.xmin;
+        let i=Math.round((x-d.xmin)/(d.xmax-d.xmin)*(d.xs.length-1)); i=clamp(i,0,d.xs.length-1);
+        const val=arr=>arr?arr[i]:NaN;
+        read.textContent=`x≈ ${d.xs[i].toFixed(3)} | y≈ ${val(d.y).toExponential(3)} | y′≈ ${val(d.yp).toExponential(3)} | y″≈ ${val(d.ypp).toExponential(3)} | L[y]≈ ${val(d.Ly).toExponential(3)}${d.split?` | αL[y₁]+βL[y₂]≈ ${val(d.splitLy).toExponential(3)}`:''}`;};
+      c.onmouseleave=()=>{read.textContent='רחפו עם העכבר על הגרף לקריאת ערכים.'};
+    }
+
+    function fmt(n){const v=Number(n); if(!isFinite(v)) return String(n); return Math.abs(v)<1e-6?'0':(Math.abs(v)<1e3?v.toFixed(3).replace(/\.0+$/,'').replace(/(\.\d*[1-9])0+$/,'$1'):v.toExponential(3));}
+    function baseExpr(type,p){const k=p,r=p; switch(type){
+      case 'sin': return {f:`sin(${fmt(k)}x)`,f1:`${fmt(k)}·cos(${fmt(k)}x)`,f2:`-${fmt(k)}^2·sin(${fmt(k)}x)`};
+      case 'cos': return {f:`cos(${fmt(k)}x)`,f1:`-${fmt(k)}·sin(${fmt(k)}x)`,f2:`-${fmt(k)}^2·cos(${fmt(k)}x)`};
+      case 'exp': return {f:`e^{${fmt(r)}x}`,f1:`${fmt(r)}·e^{${fmt(r)}x}`,f2:`${fmt(r)}^2·e^{${fmt(r)}x}`};
+      case 'x': return {f:'x',f1:'1',f2:'0'};
+      case 'x2': return {f:'x^2',f1:'2x',f2:'2'};
+      case 'x3': return {f:'x^3',f1:'3x^2',f2:'6x'};
+      default: return {f:'0',f1:'0',f2:'0'};
+    }}
+    function renderOpText(){
+      const a=+($('a').value)||0, b=+($('b').value)||0, alpha=+($('alpha').value)||0, beta=+($('beta').value)||0;
+      const E1=baseExpr($('y1Type').value, +($('p1').value)||0), E2=baseExpr($('y2Type').value, +($('p2').value)||0);
+      $('opSummaryA').textContent=`L[y](x) = y″ + ${fmt(a)}·y′ + ${fmt(b)}·y`;
+      $('opSummaryB').textContent=`עם בחירותיכם: y₁(x)=${E1.f}, y₂(x)=${E2.f}, y(x)=${fmt(alpha)}·y₁+${fmt(beta)}·y₂.`;
+      const Ly1=`L[y₁](x) = (${E1.f2}) + ${fmt(a)}·(${E1.f1}) + ${fmt(b)}·(${E1.f})`;
+      const aLy1=`α·L[y₁](x) = ${fmt(alpha)}·{ ${Ly1.replace('L[y₁](x) = ','')} }`; $('linY1').textContent=`${Ly1}\n${aLy1}`;
+      const Ly2=`L[y₂](x) = (${E2.f2}) + ${fmt(a)}·(${E2.f1}) + ${fmt(b)}·(${E2.f})`;
+      const bLy2=`β·L[y₂](x) = ${fmt(beta)}·{ ${Ly2.replace('L[y₂](x) = ','')} }`; $('linY2').textContent=`${Ly2}\n${bLy2}`;
+      $('linAlphaBeta').textContent=`L[αy₁+βy₂](x) = ( ${fmt(alpha)}·(${E1.f2}) + ${fmt(beta)}·(${E2.f2}) ) + ${fmt(a)}·( ${fmt(alpha)}·(${E1.f1}) + ${fmt(beta)}·(${E2.f1}) ) + ${fmt(b)}·( ${fmt(alpha)}·(${E1.f}) + ${fmt(beta)}·(${E2.f}) )`;
+      $('linEquality').textContent=`ולכן: L[αy₁+βy₂] = αL[y₁] + βL[y₂]`;
+    }
+
+    // OP inputs listeners
+    ['a','b','y1Type','p1','y2Type','p2','alpha','beta','xmin','xmax','showDerivs','splitCheck']
+      .forEach(id=>$(id).addEventListener('input', ()=>{ plotOp(); renderOpText(); }));
+    $('resetOp').addEventListener('click',()=>{
+      $('a').value=0; $('b').value=1;
+      $('y1Type').value='sin'; $('p1').value=1; $('y2Type').value='cos'; $('p2').value=1;
+      $('alpha').value=1; $('beta').value=1; $('xmin').value=-6; $('xmax').value=6;
+      $('showDerivs').checked=true; $('splitCheck').checked=true;
+      plotOp(); renderOpText();
+    });
+
+    // ===== IVP =====
+    const ctxIvp=$('canvasIvp').getContext('2d');
+    function rk4_step(fun,x,y,h){const k1=fun(x,y); const y2=[y[0]+0.5*h*k1[0], y[1]+0.5*h*k1[1]];
+      const k2=fun(x+0.5*h,y2); const y3=[y[0]+0.5*h*k2[0], y[1]+0.5*h*k2[1]];
+      const k3=fun(x+0.5*h,y3); const y4=[y[0]+h*k3[0], y[1]+h*k3[1]]; const k4=fun(x+h,y4);
+      return [ y[0]+h*(k1[0]+2*k2[0]+2*k3[0]+k4[0])/6, y[1]+h*(k1[1]+2*k2[1]+2*k3[1]+k4[1])/6 ]; }
+
+    function integrateIVP(){
+      const a=+($('ivp_a').value)||0, b=+($('ivp_b').value)||0, x0=+($('ivp_x0').value)||0;
+      const y0=+($('ivp_y0').value)||0, v0=+($('ivp_v0').value)||0, c1=+($('c1').value)||0, c2=+($('c2').value)||0;
+      const xmin=+($('ivp_xmin').value)||-6, xmax=+($('ivp_xmax').value)||6, h=Math.max(0.002, Math.abs(+($('ivp_h').value)||0.02));
+      const fun=(x,Y)=>{const y=Y[0],v=Y[1]; return [v, -(a*v+b*y)];};
+      function integrateOne(ic){const xs=[],ys=[]; let x=x0,Y=[ic[0],ic[1]]; xs.push(x); ys.push(Y[0]);
+        for(let xr=x0+h; xr<=xmax+1e-12; xr+=h){Y=rk4_step(fun,x,Y,h); x=xr; xs.push(x); ys.push(Y[0]);}
+        x=x0; Y=[ic[0],ic[1]];
+        for(let xl=x0-h; xl>=xmin-1e-12; xl-=h){Y=rk4_step(fun,x,Y,-h); x=xl; xs.unshift(x); ys.unshift(Y[0]);}
+        return {xs,ys};}
+      const sol1=integrateOne([1,0]), sol2=integrateOne([0,1]), solUser=integrateOne([y0,v0]);
+      let ymin=Infinity,ymax=-Infinity; const expand=a=>{for(const v of a){ymin=Math.min(ymin,v); ymax=Math.max(ymax,v);}};
+      expand(sol1.ys); expand(sol2.ys); expand(solUser.ys);
+      const ysCombo=sol1.ys.map((v,i)=>c1*v + c2*(sol2.ys[i]??0)); expand(ysCombo);
+      if(!isFinite(ymin)||!isFinite(ymax)){ymin=-1;ymax=1;} if(ymax-ymin<1e-6){ymax=ymin+1;} const margin=0.08*(ymax-ymin); ymin-=margin; ymax+=margin;
+      return {a,b,xmin,xmax,x0,y0,v0,c1,c2,h,sol1,sol2,solUser,ysCombo,ymin,ymax};
+    }
+
+    function plotIvp(){
+      const d=integrateIVP(); const c=ctxIvp.canvas, w=c.width, h=c.height; drawGrid(ctxIvp,d.xmin,d.xmax,d.ymin,d.ymax,w,h); const pad=40;
+      const draw=(xs,ys,color,width=2,dash=[])=>{ctxIvp.lineWidth=width; ctxIvp.setLineDash(dash); ctxIvp.strokeStyle=color; ctxIvp.beginPath();
+        for(let i=0;i<xs.length;i++){const [X,Y]=mapToCanvas(xs[i],ys[i],d.xmin,d.xmax,d.ymin,d.ymax,w,h,pad); if(i===0) ctxIvp.moveTo(X,Y); else ctxIvp.lineTo(X,Y);} ctxIvp.stroke(); ctxIvp.setLineDash([]);};
+      draw(d.sol1.xs,d.sol1.ys,'#22c55e',2.0);
+      draw(d.sol2.xs,d.sol2.ys,'#eab308',2.0);
+      draw(d.sol1.xs,d.ysCombo,getComputedStyle(document.documentElement).getPropertyValue('--accent'),2.6);
+      draw(d.solUser.xs,d.solUser.ys,'#f472b6',2.0,[8,6]);
+
+      ctxIvp.fillStyle='#cbd5e1'; ctxIvp.font='12px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif';
+      const [X0]=mapToCanvas(d.x0,0,d.xmin,d.xmax,d.ymin,d.ymax,w,h,pad); ctxIvp.beginPath(); ctxIvp.arc(X0,h-40,3,0,2*Math.PI); ctxIvp.fill(); ctxIvp.fillText(`x₀ = ${d.x0}`, X0-18, h-22);
+
+      renderIvpText(d);
+
+      // Hover readout
+      const read=$('ivpReadout');
+      c.onmousemove=e=>{const r=c.getBoundingClientRect(), px=e.clientX-r.left, x=(px-pad)/(w-2*pad)*(d.xmax-d.xmin)+d.xmin;
+        let i=Math.round((x-d.xmin)/(d.xmax-d.xmin)*(d.sol1.xs.length-1)); i=clamp(i,0,d.sol1.xs.length-1);
+        const y1=d.sol1.ys[i], y2=d.sol2.ys[i], yGen=d.ysCombo[i], yIC=d.solUser.ys[i];
+        read.textContent=`x≈ ${d.sol1.xs[i].toFixed(3)} | y₁≈ ${y1.toExponential(3)} | y₂≈ ${y2.toExponential(3)} | y=c₁y₁+c₂y₂≈ ${yGen.toExponential(3)} | פתרון-IC≈ ${yIC.toExponential(3)}`; };
+      c.onmouseleave=()=>{read.textContent='רחפו עם העכבר על הגרף לקריאת ערכים.'};
+    }
+
+    function renderIvpText(d){
+      $('ivpOp').textContent=`L[y] = y″ + ${fmt(d.a)}·y′ + ${fmt(d.b)}·y`;
+      $('ivpBasis').textContent=`הבסיס: y₁ ו-y₂ כאשר ב-x₀=${fmt(d.x0)} מתקיים  y₁(x₀)=1, y₁′(x₀)=0  ו-  y₂(x₀)=0, y₂′(x₀)=1.`;
+      $('ivpGeneral').textContent=`הפתרון הכללי המוצג:  y(x) = c₁·y₁(x) + c₂·y₂(x)  עם  c₁=${fmt(d.c1)},  c₂=${fmt(d.c2)}.`;
+      $('ivpIC').textContent=`תנאי ההתחלה שנבחרו:  x₀=${fmt(d.x0)},  y₀=y(x₀)=${fmt(d.y0)},  v₀=y′(x₀)=${fmt(d.v0)}.`;
+      $('ivpCompare').textContent=`לכן עבור הפתרון ל-IC:  c₁ = y₀,  c₂ = v₀ (העקומה המקווקווית).`;
+    }
+
+    //  IVP inputs listeners (התווספו כדי שהגרף יתעדכן בזמן אמת)
+    ['ivp_a','ivp_b','ivp_x0','ivp_y0','ivp_v0','c1','c2','ivp_xmin','ivp_xmax','ivp_h']
+      .forEach(id=>$(id).addEventListener('input', plotIvp));
+    $('resetIvp').addEventListener('click',()=>{
+      $('ivp_a').value=0.4; $('ivp_b').value=1;
+      $('ivp_x0').value=0; $('ivp_y0').value=1; $('ivp_v0').value=0;
+      $('c1').value=1; $('c2').value=0.5; $('ivp_xmin').value=-6; $('ivp_xmax').value=6; $('ivp_h').value=0.02;
+      plotIvp();
+    });
+
+    // Tabs
+    const tabs=document.querySelectorAll('.tab-btn');
+    tabs.forEach(btn=>btn.addEventListener('click',()=>{
+      tabs.forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const tab=btn.dataset.tab;
+      document.getElementById('tab-op').hidden=(tab!=='op');
+      document.getElementById('tab-ivp').hidden=(tab!=='ivp');
+      if(tab==='op'){plotOp();} else {plotIvp();}
+    }));
+
+    // Initial draw
+    plotOp();
+    plotIvp();
+    renderOpText();
+  </script>
+</body>
+</html>
