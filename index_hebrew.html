@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="he" dir="rtl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Second-Order Linear Differential Operator</title>
+  <title>אופרטור דיפרנציאלי לינארי מסדר שני</title>
   <style>
     :root{
       --bg:#0f172a;
@@ -25,7 +25,8 @@
     h2{font-size:1.1rem;margin:18px 0 8px 0}
     .card{background:var(--card);border-radius:16px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
     .row{display:flex;gap:12px;flex-wrap:wrap}
-        .col{flex:1 1 320px;min-width:280px}
+    .row.op{flex-direction:row-reverse}
+    .col{flex:1 1 320px;min-width:280px}
     label{font-size:.9rem}
     select,input[type="number"],input[type="range"],button{width:100%;margin-top:6px;margin-bottom:10px;background:#0b1220;color:var(--text);border:1px solid #1f2937;border-radius:10px;padding:8px}
     input[type="range"]{height:34px}
@@ -48,22 +49,22 @@
 <body>
   <div class="container">
     <h1>
-      <span class="muted">The Linear Operator: </span>
+      <span class="muted">האופרטור הלינארי: </span>
       <span class="muted">L[y] = y″ + a y′ + b y</span>
     </h1>
 
-    <div class="tabs" role="tablist" aria-label="Modes">
-      <button class="tab-btn active" data-tab="op">Operator & Linearity</button>
-      <button class="tab-btn" data-tab="ivp">Homogeneous IVP — Constant Coefficients</button>
+    <div class="tabs" role="tablist" aria-label="מצבים">
+      <button class="tab-btn active" data-tab="op">אופרטור ולינאריות</button>
+      <button class="tab-btn" data-tab="ivp">בעיית התחלה הומוגנית - מקדמים קבועים</button>
     </div>
 
     <!-- ===== OPERATOR / LINEARITY ===== -->
-    <section id="tab-op" class="card" aria-labelledby="Operator and Linearity">
-      <div class="row">
+    <section id="tab-op" class="card" aria-labelledby="אופרטור ולינאריות">
+      <div class="row op">
         <!-- Right column -->
         <div class="col">
-          <h2>Choose y₁, y₂ (serving as v₁, v₂)</h2>
-          <label>Choose y₁(x)</label>
+          <h2>בחירת y₁, y₂ (בתפקיד v₁, v₂)</h2>
+          <label>בחירת y₁(x)</label>
           <select id="y1Type">
             <option value="sin">sin(kx)</option>
             <option value="cos">cos(kx)</option>
@@ -72,10 +73,10 @@
             <option value="x2">x^2</option>
             <option value="x3">x^3</option>
           </select>
-          <label>Choose the parameter k or r for y₁(x)</label>
+          <label>בחירת הפרמטר k או r עבור y₁(x)</label>
           <input id="p1" type="number" step="0.1" value="1" />
 
-          <label>Choose y₂(x)</label>
+          <label>בחירת y₂(x)</label>
           <select id="y2Type">
             <option value="cos">cos(kx)</option>
             <option value="sin">sin(kx)</option>
@@ -84,33 +85,33 @@
             <option value="x2">x^2</option>
             <option value="x3">x^3</option>
           </select>
-          <label>Choose the parameter k or r for y₂(x)</label>
+          <label>בחירת הפרמטר k או r עבור y₂(x)</label>
           <input id="p2" type="number" step="0.1" value="1" />
         </div>
 
         <!-- Middle column -->
         <div class="col">
-          <h2>Define the operator as a 2nd-order linear homogeneous ODE with coefficients a, b</h2>
+          <h2>הגדרת האופרטור כמד"ר לינארית הומוגנית מסדר 2 עם המקדמים a,b</h2>
           <label>a</label>
           <input id="a" type="number" step="0.1" value="0" />
           <label>b</label>
           <input id="b" type="number" step="0.1" value="1" />
           <div class="eq">L[y](x) = y″(x) + a·y′(x) + b·y(x)</div>
 
-          <h2>Domain & Display</h2>
-          <label>x range</label>
+          <h2>תחום ותצוגה</h2>
+          <label>טווח x</label>
           <div class="row tight">
             <div class="col"><input id="xmin" type="number" step="0.5" value="-6" /></div>
             <div class="col"><input id="xmax" type="number" step="0.5" value="6" /></div>
           </div>
-          <label><input id="showDerivs" type="checkbox" checked /> Show y′ and y″ as well</label>
-          <label><input id="splitCheck" type="checkbox" checked /> Show comparison: L[αy₁+βy₂] vs αL[y₁]+βL[y₂]</label>
-          <button id="resetOp">Reset</button>
+          <label><input id="showDerivs" type="checkbox" checked /> הציגו גם y′ ו-y″</label>
+          <label><input id="splitCheck" type="checkbox" checked /> הציגו השוואה: L[αy₁+βy₂] מול αL[y₁]+βL[y₂]</label>
+          <button id="resetOp">איפוס</button>
         </div>
 
-        <!-- Right column -->
+        <!-- Left column -->
         <div class="col">
-          <h2>Linear combination of v₁, v₂</h2>
+          <h2>צירוף לינארי של v₁,v₂</h2>
           <label>α</label>
           <input id="alpha" type="range" min="-3" max="3" value="1" step="0.1" />
           <label>β</label>
@@ -121,19 +122,19 @@
       <div class="legend">
         <span class="chip"><span class="dot" style="background:var(--accent)"></span> y(x)</span>
         <span class="chip"><span class="dot" style="background:var(--accent2)"></span> L[y](x)</span>
-        <span id="chipSplit" class="chip"><span class="dot" style="background:var(--accent3)"></span> αL[y₁]+βL[y₂] (comparison)</span>
-        <span class="chip"><span class="dot" style="background:#9ca3af"></span> y′, y″ (gray)</span>
+        <span id="chipSplit" class="chip"><span class="dot" style="background:var(--accent3)"></span> αL[y₁]+βL[y₂] (השוואה)</span>
+        <span class="chip"><span class="dot" style="background:#9ca3af"></span> y′, y″ (אפור)</span>
       </div>
-      <canvas id="canvasOp" width="1080" height="460" aria-label="Operator graph"></canvas>
+      <canvas id="canvasOp" width="1080" height="460" aria-label="גרף אופרטור"></canvas>
 
       <div class="row" style="margin-top:8px; align-items:flex-start; gap:12px;">
         <div class="col" style="min-width:320px; max-width:520px;">
-          <div class="eq eq-orange" id="opSummaryTitle">The linear operator you chose is:</div>
+          <div class="eq eq-orange" id="opSummaryTitle">האופרטור הלינארי שבחרתם הוא:</div>
           <div class="eq eq-orange" id="opSummaryA" style="margin-top:6px;"></div>
           <div class="eq eq-orange" id="opSummaryB" style="margin-top:6px;"></div>
         </div>
         <div class="col" style="min-width:320px; max-width:520px;">
-          <div class="eq" id="linSummaryTitle">Explicit linearity for your choices</div>
+          <div class="eq" id="linSummaryTitle">לינאריות מפורשת עבור בחירותיכם</div>
           <div class="eq" id="linY1" style="margin-top:6px;"></div>
           <div class="eq" id="linY2" style="margin-top:6px;"></div>
           <div class="eq" id="linAlphaBeta" style="margin-top:6px;"></div>
@@ -141,38 +142,38 @@
         </div>
       </div>
 
-      <div class="note" id="readout">Hover over the graph to read values.</div>
+      <div class="note" id="readout">רחפו עם העכבר על הגרף לקריאת ערכים.</div>
     </section>
 
     <!-- ===== HOMOGENEOUS IVP (CONSTANT COEFFS) ===== -->
-    <section id="tab-ivp" class="card" hidden aria-labelledby="Homogeneous IVP — Constant Coefficients">
+    <section id="tab-ivp" class="card" hidden aria-labelledby="בעיית התחלה הומוגנית - מקדמים קבועים">
       <div class="row">
         <div class="col">
-          <h2>Choose coefficient C1 for the general solution</h2>
+          <h2>בחירת המקדם C1 בהצגת הפתרון הכללי</h2>
           <input id="c1" type="range" min="-3" max="3" step="0.1" value="1" />
-          <h2>Choose coefficient C2 for the general solution</h2>
+          <h2>בחירת המקדם C2 בהצגת הפתרון הכללי</h2>
           <input id="c2" type="range" min="-3" max="3" step="0.1" value="0.5" />
         </div>
 
         <div class="col">
-          <h2>Choose initial conditions</h2>
+          <h2>בחירת תנאי ההתחלה</h2>
           <label>x₀</label><input id="ivp_x0" type="number" step="0.1" value="0" />
           <label>y(x₀) =</label><input id="ivp_y0" type="number" step="0.1" value="1" />
           <label>y′(x₀) =</label><input id="ivp_v0" type="number" step="0.1" value="0" />
 
-          <h2>Range & Steps</h2>
-          <label>x range</label>
+          <h2>טווח וצעדים</h2>
+          <label>טווח x</label>
           <div class="row tight">
             <div class="col"><input id="ivp_xmin" type="number" step="0.5" value="-6" /></div>
             <div class="col"><input id="ivp_xmax" type="number" step="0.5" value="6" /></div>
           </div>
-          <label>Δx (smaller = more accurate)</label>
+          <label>Δx (קטן = מדויק יותר)</label>
           <input id="ivp_h" type="number" step="0.01" value="0.02" />
-          <button id="resetIvp">Reset</button>
+          <button id="resetIvp">איפוס</button>
         </div>
 
         <div class="col">
-          <h2>Choose constant equation coefficients</h2>
+          <h2>בחירת מקדמי המשוואה הקבועים</h2>
           <label>a</label><input id="ivp_a" type="number" step="0.1" value="0.4" />
           <label>b</label><input id="ivp_b" type="number" step="0.1" value="1" />
           <div class="eq">y″ + a·y′ + b·y = 0</div>
@@ -180,15 +181,15 @@
       </div>
 
       <div class="legend">
-        <span class="chip"><span class="dot" style="background:var(--accent)"></span> General solution: y(x)=c₁·y₁(x)+c₂·y₂(x)</span>
-        <span class="chip"><span class="dot" style="background:#22c55e"></span> y₁: initial conditions</span>
-        <span class="chip"><span class="dot" style="background:#eab308"></span> y₂: initial conditions</span>
-        <span class="chip"><span class="dot" style="background:#f472b6"></span> Solution for chosen IC: y(x₀)=y₀, y′(x₀)=v₀ (dashed)</span>
+        <span class="chip"><span class="dot" style="background:var(--accent)"></span> הפתרון הכללי: y(x)=c₁·y₁(x)+c₂·y₂(x)</span>
+        <span class="chip"><span class="dot" style="background:#22c55e"></span> y₁: תנאי התחלה</span>
+        <span class="chip"><span class="dot" style="background:#eab308"></span> y₂: תנאי התחלה</span>
+        <span class="chip"><span class="dot" style="background:#f472b6"></span> פתרון ל-IC שנבחרו: y(x₀)=y₀, y′(x₀)=v₀ (מקווקו)</span>
       </div>
 
-      <canvas id="canvasIvp" width="1080" height="460" aria-label="Homogeneous IVP solution graph"></canvas>
+      <canvas id="canvasIvp" width="1080" height="460" aria-label="גרף פתרון בעיית התחלה הומוגנית"></canvas>
 
-      <!-- Dynamic text + mouse readout -->
+      <!-- טקסטים דינמיים + קריאת ערכים עם העכבר -->
       <div class="row" style="margin-top:8px; align-items:flex-start; gap:12px;">
         <div class="col" style="min-width:320px; max-width:520px;">
           <div class="eq eq-orange" id="ivpOp">L[y] = y″ + a·y′ + b·y</div>
@@ -201,12 +202,8 @@
         </div>
       </div>
 
-      <div class="note" id="ivpReadout">Hover over the graph to read values.</div>
+      <div class="note" id="ivpReadout">רחפו עם העכבר על הגרף לקריאת ערכים.</div>
     </section>
-
-    <footer style="text-align:center; color:#cbd5e1; font-size:0.85rem; margin-top:24px; padding:12px 0;">
-      &copy; Developed by Shir Sivroni | All rights reserved
-    </footer>
   </div>
 
   <script>
@@ -294,7 +291,7 @@
         let i=Math.round((x-d.xmin)/(d.xmax-d.xmin)*(d.xs.length-1)); i=clamp(i,0,d.xs.length-1);
         const val=arr=>arr?arr[i]:NaN;
         read.textContent=`x≈ ${d.xs[i].toFixed(3)} | y≈ ${val(d.y).toExponential(3)} | y′≈ ${val(d.yp).toExponential(3)} | y″≈ ${val(d.ypp).toExponential(3)} | L[y]≈ ${val(d.Ly).toExponential(3)}${d.split?` | αL[y₁]+βL[y₂]≈ ${val(d.splitLy).toExponential(3)}`:''}`;};
-      c.onmouseleave=()=>{read.textContent='Hover over the graph to read values.'};
+      c.onmouseleave=()=>{read.textContent='רחפו עם העכבר על הגרף לקריאת ערכים.'};
     }
 
     function fmt(n){const v=Number(n); if(!isFinite(v)) return String(n); return Math.abs(v)<1e-6?'0':(Math.abs(v)<1e3?v.toFixed(3).replace(/\.0+$/,'').replace(/(\.\d*[1-9])0+$/,'$1'):v.toExponential(3));}
@@ -311,13 +308,13 @@
       const a=+($('a').value)||0, b=+($('b').value)||0, alpha=+($('alpha').value)||0, beta=+($('beta').value)||0;
       const E1=baseExpr($('y1Type').value, +($('p1').value)||0), E2=baseExpr($('y2Type').value, +($('p2').value)||0);
       $('opSummaryA').textContent=`L[y](x) = y″ + ${fmt(a)}·y′ + ${fmt(b)}·y`;
-      $('opSummaryB').textContent=`With your choices: y₁(x)=${E1.f}, y₂(x)=${E2.f}, y(x)=${fmt(alpha)}·y₁+${fmt(beta)}·y₂.`;
+      $('opSummaryB').textContent=`עם בחירותיכם: y₁(x)=${E1.f}, y₂(x)=${E2.f}, y(x)=${fmt(alpha)}·y₁+${fmt(beta)}·y₂.`;
       const Ly1=`L[y₁](x) = (${E1.f2}) + ${fmt(a)}·(${E1.f1}) + ${fmt(b)}·(${E1.f})`;
       const aLy1=`α·L[y₁](x) = ${fmt(alpha)}·{ ${Ly1.replace('L[y₁](x) = ','')} }`; $('linY1').textContent=`${Ly1}\n${aLy1}`;
       const Ly2=`L[y₂](x) = (${E2.f2}) + ${fmt(a)}·(${E2.f1}) + ${fmt(b)}·(${E2.f})`;
       const bLy2=`β·L[y₂](x) = ${fmt(beta)}·{ ${Ly2.replace('L[y₂](x) = ','')} }`; $('linY2').textContent=`${Ly2}\n${bLy2}`;
       $('linAlphaBeta').textContent=`L[αy₁+βy₂](x) = ( ${fmt(alpha)}·(${E1.f2}) + ${fmt(beta)}·(${E2.f2}) ) + ${fmt(a)}·( ${fmt(alpha)}·(${E1.f1}) + ${fmt(beta)}·(${E2.f1}) ) + ${fmt(b)}·( ${fmt(alpha)}·(${E1.f}) + ${fmt(beta)}·(${E2.f}) )`;
-      $('linEquality').textContent=`Therefore: L[αy₁+βy₂] = αL[y₁] + βL[y₂]`;
+      $('linEquality').textContent=`ולכן: L[αy₁+βy₂] = αL[y₁] + βL[y₂]`;
     }
 
     // OP inputs listeners
@@ -375,19 +372,19 @@
       c.onmousemove=e=>{const r=c.getBoundingClientRect(), px=e.clientX-r.left, x=(px-pad)/(w-2*pad)*(d.xmax-d.xmin)+d.xmin;
         let i=Math.round((x-d.xmin)/(d.xmax-d.xmin)*(d.sol1.xs.length-1)); i=clamp(i,0,d.sol1.xs.length-1);
         const y1=d.sol1.ys[i], y2=d.sol2.ys[i], yGen=d.ysCombo[i], yIC=d.solUser.ys[i];
-        read.textContent=`x≈ ${d.sol1.xs[i].toFixed(3)} | y₁≈ ${y1.toExponential(3)} | y₂≈ ${y2.toExponential(3)} | y=c₁y₁+c₂y₂≈ ${yGen.toExponential(3)} | IC-solution≈ ${yIC.toExponential(3)}`; };
-      c.onmouseleave=()=>{read.textContent='Hover over the graph to read values.'};
+        read.textContent=`x≈ ${d.sol1.xs[i].toFixed(3)} | y₁≈ ${y1.toExponential(3)} | y₂≈ ${y2.toExponential(3)} | y=c₁y₁+c₂y₂≈ ${yGen.toExponential(3)} | פתרון-IC≈ ${yIC.toExponential(3)}`; };
+      c.onmouseleave=()=>{read.textContent='רחפו עם העכבר על הגרף לקריאת ערכים.'};
     }
 
     function renderIvpText(d){
       $('ivpOp').textContent=`L[y] = y″ + ${fmt(d.a)}·y′ + ${fmt(d.b)}·y`;
-      $('ivpBasis').textContent=`Basis: y₁ and y₂ where at x₀=${fmt(d.x0)} we have  y₁(x₀)=1, y₁′(x₀)=0  and  y₂(x₀)=0, y₂′(x₀)=1.`;
-      $('ivpGeneral').textContent=`General solution shown:  y(x) = c₁·y₁(x) + c₂·y₂(x)  with  c₁=${fmt(d.c1)},  c₂=${fmt(d.c2)}.`;
-      $('ivpIC').textContent=`Chosen initial conditions:  x₀=${fmt(d.x0)},  y₀=y(x₀)=${fmt(d.y0)},  v₀=y′(x₀)=${fmt(d.v0)}.`;
-      $('ivpCompare').textContent=`Therefore for the IC solution:  c₁ = y₀,  c₂ = v₀ (the dashed curve).`;
+      $('ivpBasis').textContent=`הבסיס: y₁ ו-y₂ כאשר ב-x₀=${fmt(d.x0)} מתקיים  y₁(x₀)=1, y₁′(x₀)=0  ו-  y₂(x₀)=0, y₂′(x₀)=1.`;
+      $('ivpGeneral').textContent=`הפתרון הכללי המוצג:  y(x) = c₁·y₁(x) + c₂·y₂(x)  עם  c₁=${fmt(d.c1)},  c₂=${fmt(d.c2)}.`;
+      $('ivpIC').textContent=`תנאי ההתחלה שנבחרו:  x₀=${fmt(d.x0)},  y₀=y(x₀)=${fmt(d.y0)},  v₀=y′(x₀)=${fmt(d.v0)}.`;
+      $('ivpCompare').textContent=`לכן עבור הפתרון ל-IC:  c₁ = y₀,  c₂ = v₀ (העקומה המקווקווית).`;
     }
 
-    // IVP inputs listeners (added so graph updates in real time)
+    //  IVP inputs listeners (התווספו כדי שהגרף יתעדכן בזמן אמת)
     ['ivp_a','ivp_b','ivp_x0','ivp_y0','ivp_v0','c1','c2','ivp_xmin','ivp_xmax','ivp_h']
       .forEach(id=>$(id).addEventListener('input', plotIvp));
     $('resetIvp').addEventListener('click',()=>{
